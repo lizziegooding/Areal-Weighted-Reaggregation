@@ -1,13 +1,30 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Areal-Weighted-Reaggregation</title>
-    <link rel="stylesheet" href="base.css">
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="script.js"></script>
-  </head>
-  <body>
-    <h1>Areal-Weighted-Reaggregation</h1>
-  </body>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.26.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.26.0/mapbox-gl.css' rel='stylesheet' />
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.12.1/mapbox-gl-draw.css' type='text/css'/>
+    <link href='base.css' rel='stylesheet'>
+</head>
+
+<body>
+
+  <div id='map'></div>
+  <div class='calculation-box'>
+    <p>Draw a polygon using the draw tools.</p>
+    <div id='calculate' class='button button'>Calculate area</div>
+    <div id='calculated-area'></div>
+  </div>
+
+  <script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+  <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/turf/v3.0.11/turf.min.js'></script>
+  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.12.1/mapbox-gl-draw.js'></script>
+  <script src='script.js'></script>
+</body>
 </html>
