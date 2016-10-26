@@ -25,10 +25,11 @@
   //TODO: Look up add control method-- also used with directions api
   map.addControl(draw);
 
-  var $editButton = $('#edit');
-  $('.edit').on('click', function(){
-    $('.edit').toggle();
-    if ($editButton.is(':visible')){
+  //Allow user to toggle editing mode
+  var $editButtons = $('.edit');
+  $editButtons.on('click', function(){
+    $editButtons.toggle();
+    if ($editButtons.first().is(':visible')){
       console.log('Change mode, static');
       draw.changeMode('static', createOptions());
     } else {
