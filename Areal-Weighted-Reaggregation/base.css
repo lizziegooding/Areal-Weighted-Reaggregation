@@ -33,6 +33,10 @@ body {
     margin: 10px 0;
 }
 
+#stopEdit {
+  display: none;
+}
+
 p {
     font-family: 'Open Sans';
     margin: 0;

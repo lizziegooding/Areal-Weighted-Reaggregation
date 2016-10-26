@@ -1,5 +1,5 @@
 // Sandbox for Areal-Weighted-Reaggregation
-$(document).ready(function() {
+// $(document).ready(function() {
   mapboxgl.accessToken = 'pk.eyJ1IjoibGl6emllZ29vZGluZyIsImEiOiJjaW92cmc1NHYwMWJsdW9tOHowdTA2cnFsIn0.lFq-Wju99kZ_dR_2TMBYCQ';
 
   // Create a new Mapbox GL Map object
@@ -26,9 +26,19 @@ $(document).ready(function() {
   map.addControl(draw);
 
   var $editButton = $('#edit');
-  $editButton.on('click', function(){
-    draw.modes.DIRECT_SELECT === 'direct_select';
+  $('.edit').on('click', function(){
+    $('.edit').toggle();
+    if ($editButton.display === true){
+      draw.changeMode('static', draw.getAll().features[0].id);
+    } else {
+      draw.changeMode('direct_select', draw.getAll().features[0].id);
+    }
   });
+
+  //Create an options object to pass to the .changeMode method as an argument
+  function createOptions() {
+    draw.getAll().features[0].id
+  }
 
   var $calcButton = $('#calculate');
   $calcButton.on('click', function() {
@@ -48,4 +58,4 @@ $(document).ready(function() {
       alert('Use the draw tools to draw a polygon!');
     }
   });
-});
+// });
