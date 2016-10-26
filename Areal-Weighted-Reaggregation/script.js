@@ -19,19 +19,25 @@ $(document).ready(function() {
       trash: true
     }
   });
+  //TODO: Look up add control method-- also used with directions api
   map.addControl(draw);
 
-  var calcButton = document.getElementById('calculate');
-  calcButton.onclick = function() {
+  var $calcButton = $('#calculate');
+  $calcButton.on('click', function() {
+    //Get all vertices from draw object TODO: check
     var data = draw.getAll();
+    //If user has drawn a feature...
     if (data.features.length > 0) {
+      //Use Turf to calculate feature area
       var area = turf.area(data);
       // restrict to area to 2 decimal points
-      var rounded_area = Math.round(area * 100) / 100;
-      var answer = document.getElementById('calculated-area');
-      answer.innerHTML = '<p><strong>' + rounded_area + '</strong></p><p>square meters</p>';
+      var roundedArea = Math.round(area * 100) / 100;
+      var $answer = $('#calculated-area');
+      $answer.html('<p><strong>' + roundedArea + '</strong></p><p>square meters</p>');
+
+    //Else, ask user to draw a feature
     } else {
       alert('Use the draw tools to draw a polygon!');
     }
-  };
+  });
 });
