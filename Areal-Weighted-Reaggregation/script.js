@@ -28,16 +28,33 @@
   var $editButton = $('#edit');
   $('.edit').on('click', function(){
     $('.edit').toggle();
-    if ($editButton.display === true){
-      draw.changeMode('static', draw.getAll().features[0].id);
+    if ($editButton.is(':visible')){
+      console.log('Change mode, static');
+      draw.changeMode('static', createOptions());
     } else {
-      draw.changeMode('direct_select', draw.getAll().features[0].id);
+      console.log('Change mode, simple select');
+      draw.changeMode('simple_select', createOptions());
     }
   });
 
   //Create an options object to pass to the .changeMode method as an argument
   function createOptions() {
-    draw.getAll().features[0].id
+    var features = draw.getAll().features;
+    var options = {};
+    if (features.length === 1) {
+      options.featureId = features[0].id;
+    }
+    else if (features.length > 1){
+      var arr = [];
+      for (var ii = 0; ii < features.length; ii++){
+        arr.push(features[ii].id);
+      }
+      options.featureIds = arr;
+    }
+    else {
+      alert('Use the draw tools to draw a polygon!');
+    }
+    return options;
   }
 
   var $calcButton = $('#calculate');
