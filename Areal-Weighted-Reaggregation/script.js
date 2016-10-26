@@ -13,14 +13,22 @@ $(document).ready(function() {
   // Create a new Mapbox GL draw object
   var draw = mapboxgl.Draw({
     drawing: true,
+    //Customize controls to display
     displayControlsDefault: false,
     controls: {
       polygon: true,
-      trash: true
+      trash: true,
+      combine_features: true,
+      uncombine_features: true
     }
   });
   //TODO: Look up add control method-- also used with directions api
   map.addControl(draw);
+
+  var $editButton = $('#edit');
+  $editButton.on('click', function(){
+    draw.modes.DIRECT_SELECT === 'direct_select';
+  });
 
   var $calcButton = $('#calculate');
   $calcButton.on('click', function() {

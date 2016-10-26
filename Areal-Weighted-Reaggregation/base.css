@@ -12,7 +12,7 @@ body {
 }
 
 .calculation-box {
-    height: 140px;
+    /*height: 140px;*/
     width: 150px;
     position: absolute;
     top: 210px;
@@ -22,7 +22,7 @@ body {
     text-align: center;
 }
 
-#calculate {
+.button {
     min-height: 20px;
     background-color: #3887be;
     color: #fff;
