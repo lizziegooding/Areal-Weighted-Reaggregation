@@ -7,35 +7,89 @@
     container: 'map', // container id
     style: 'mapbox://styles/mapbox/satellite-v9', //hosted style, satellite
     center: [-91.874, 42.760], // starting position
-    zoom: 12 // starting zoom
+    zoom: 8 // starting zoom
   });
 
-  // Create a new Mapbox GL draw object
-  var draw = mapboxgl.Draw({
-    drawing: true,
-    //Customize controls to display
-    displayControlsDefault: false,
-    controls: {
-      polygon: true,
-      trash: true,
-      combine_features: true,
-      uncombine_features: true
-    }
-  });
-  //TODO: Look up add control method-- also used with directions api
-  map.addControl(draw);
+  map.on('load', function() {
 
-  //Allow user to toggle editing mode
-  var $editButtons = $('.edit');
-  $editButtons.on('click', function(){
-    $editButtons.toggle();
-    if ($editButtons.first().is(':visible')){
-      console.log('Change mode, static');
-      draw.changeMode('static', createOptions());
-    } else {
-      console.log('Change mode, simple select');
-      draw.changeMode('simple_select', createOptions());
-    }
+    map.addSource('counties', {
+      type: 'vector',
+      url: 'mapbox://lizziegooding.7ysestm0'
+    });
+
+    map.addLayer({
+      'id': 'counties',
+      'type': 'fill',
+      //Name of vector tiles from .addSource method above
+      'source': 'counties',
+      //Name of vector tiles uploaded to Mapbox Tileset
+      'source-layer': 'County_2010Census_DP1-d3qmd4',
+      'paint': {
+        'fill-color': '#ff69b4',
+        'fill-outline-color': 'white',
+        'fill-opacity': 0.5
+      }
+    });
+    // map.addLayer({
+    //   'id': 'counties',
+    //   'type': 'fill',
+    //   'source': 'counties',
+    //   'source-layer': 'counties',
+    //   'layout': {
+    //     'visibility': 'visible'
+    //   },
+    //   'paint': {
+    //     'fill-color': '#ff69b4'
+    //   }
+    // });
+
+    // Create a new Mapbox GL draw object
+    var draw = mapboxgl.Draw({
+      drawing: true,
+      //Customize controls to display
+      displayControlsDefault: false,
+      controls: {
+        polygon: true,
+        trash: true,
+        combine_features: true,
+        uncombine_features: true
+      }
+    });
+    //TODO: Look up add control method-- also used with directions api
+    map.addControl(draw);
+
+    //Allow user to toggle editing mode
+    var $editButtons = $('.edit');
+    $editButtons.on('click', function(){
+      $editButtons.toggle();
+      if ($editButtons.first().is(':visible')){
+        console.log('Change mode, static');
+        draw.changeMode('static', createOptions());
+      } else {
+        console.log('Change mode, simple select');
+        draw.changeMode('simple_select', createOptions());
+      }
+    });
+
+    var $calcButton = $('#calculate');
+    $calcButton.on('click', function() {
+      //Get all vertices from draw object TODO: check
+      var data = draw.getAll();
+      //If user has drawn a feature...
+      if (data.features.length > 0) {
+        //Use Turf to calculate feature area
+        var area = turf.area(data);
+        // restrict to area to 2 decimal points
+        var roundedArea = Math.round(area * 100) / 100;
+        var $answer = $('#calculated-area');
+        $answer.html('<p><strong>' + roundedArea + '</strong></p><p>square meters</p>');
+
+      //Else, ask user to draw a feature
+      } else {
+        alert('Use the draw tools to draw a polygon!');
+      }
+    });
+
   });
 
   //Create an options object to pass to the .changeMode method as an argument
@@ -57,23 +111,3 @@
     }
     return options;
   }
-
-  var $calcButton = $('#calculate');
-  $calcButton.on('click', function() {
-    //Get all vertices from draw object TODO: check
-    var data = draw.getAll();
-    //If user has drawn a feature...
-    if (data.features.length > 0) {
-      //Use Turf to calculate feature area
-      var area = turf.area(data);
-      // restrict to area to 2 decimal points
-      var roundedArea = Math.round(area * 100) / 100;
-      var $answer = $('#calculated-area');
-      $answer.html('<p><strong>' + roundedArea + '</strong></p><p>square meters</p>');
-
-    //Else, ask user to draw a feature
-    } else {
-      alert('Use the draw tools to draw a polygon!');
-    }
-  });
-// });
