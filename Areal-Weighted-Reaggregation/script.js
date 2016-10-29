@@ -7,7 +7,7 @@
     container: 'map', // container id
     style: 'mapbox://styles/mapbox/satellite-v9', //hosted style, satellite
     center: [-91.874, 42.760], // starting position
-    zoom: 12 // starting zoom
+    zoom: 8 // starting zoom
   });
 
   // Create a new Mapbox GL draw object
@@ -24,6 +24,26 @@
   });
   //TODO: Look up add control method-- also used with directions api
   map.addControl(draw);
+
+  map.on('load', function() {
+    map.addSource('counties', {
+      type: 'vector',
+      url: 'mapbox://lizziegooding.7ysestm0'
+    });
+
+    map.addLayer({
+      'id': 'counties',
+      'type': 'fill',
+      'source': 'counties',
+      'source-layer': 'counties',
+      'layout': {
+        'visibility': 'visible'
+      },
+      'paint': {
+        'fill-color': '#ff69b4'
+      }
+    });
+  });
 
   //Allow user to toggle editing mode
   var $editButtons = $('.edit');
@@ -76,4 +96,3 @@
       alert('Use the draw tools to draw a polygon!');
     }
   });
-// });
