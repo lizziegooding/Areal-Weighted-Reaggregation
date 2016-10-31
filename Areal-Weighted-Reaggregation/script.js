@@ -100,7 +100,23 @@
   }
 
   $('#intersect').on('click', function() {
+    //Calculate intersect
     var intersect = turf.intersect(draw.getAll().features[0], draw.getAll().features[1]);
     console.log('Calculated intersect');
     console.log(intersect);
+    //Add returned intersected polygon to map
+    map.addSource('intersect', {
+      'type': 'geojson',
+      'data': intersect
+    });
+    map.addLayer({
+      'id': 'intersect',
+      'type': 'fill',
+      'source': 'intersect',
+      'layout': {},
+      'paint': {
+        'fill-color': '#088',
+        'fill-opacity': 0.8
+      }
+    });
   });
