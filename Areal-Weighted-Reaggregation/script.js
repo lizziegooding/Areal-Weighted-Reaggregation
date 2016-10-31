@@ -30,66 +30,54 @@
         'fill-opacity': 0.5
       }
     });
-    // map.addLayer({
-    //   'id': 'counties',
-    //   'type': 'fill',
-    //   'source': 'counties',
-    //   'source-layer': 'counties',
-    //   'layout': {
-    //     'visibility': 'visible'
-    //   },
-    //   'paint': {
-    //     'fill-color': '#ff69b4'
-    //   }
-    // });
+  }); // End map.on(load)
 
-    // Create a new Mapbox GL draw object
-    var draw = mapboxgl.Draw({
-      drawing: true,
-      //Customize controls to display
-      displayControlsDefault: false,
-      controls: {
-        polygon: true,
-        trash: true,
-        combine_features: true,
-        uncombine_features: true
-      }
-    });
-    //TODO: Look up add control method-- also used with directions api
-    map.addControl(draw);
+  // Create a new Mapbox GL draw object-- needs to be outside map.on(load) function to work
+  var draw = mapboxgl.Draw({
+    drawing: true,
+    //Customize controls to display
+    displayControlsDefault: false,
+    controls: {
+      polygon: true,
+      trash: true,
+      combine_features: true,
+      uncombine_features: true
+    }
+  });
+  //TODO: Look up add control method-- also used with directions api
+  map.addControl(draw);
 
-    //Allow user to toggle editing mode
-    var $editButtons = $('.edit');
-    $editButtons.on('click', function(){
-      $editButtons.toggle();
-      if ($editButtons.first().is(':visible')){
-        console.log('Change mode, static');
-        draw.changeMode('static', createOptions());
-      } else {
-        console.log('Change mode, simple select');
-        draw.changeMode('simple_select', createOptions());
-      }
-    });
+  //Allow user to toggle editing mode
+  var $editButtons = $('.edit');
+  $editButtons.on('click', function(){
+    $editButtons.toggle();
+    if ($editButtons.first().is(':visible')){
+      console.log('Change mode, static');
+      draw.changeMode('static', createOptions());
+    } else {
+      console.log('Change mode, simple select');
+      draw.changeMode('simple_select', createOptions());
+    }
+  });
 
-    var $calcButton = $('#calculate');
-    $calcButton.on('click', function() {
-      //Get all vertices from draw object TODO: check
-      var data = draw.getAll();
-      //If user has drawn a feature...
-      if (data.features.length > 0) {
-        //Use Turf to calculate feature area
-        var area = turf.area(data);
-        // restrict to area to 2 decimal points
-        var roundedArea = Math.round(area * 100) / 100;
-        var $answer = $('#calculated-area');
-        $answer.html('<p><strong>' + roundedArea + '</strong></p><p>square meters</p>');
+  //Calculate area of selected features
+  var $calcButton = $('#calculate');
+  $calcButton.on('click', function() {
+    //Get all vertices from draw object TODO: check
+    var data = draw.getSelected();
+    //If user has drawn a feature...
+    if (data.features.length > 0) {
+      //Use Turf to calculate feature area
+      var area = turf.area(data);
+      // restrict to area to 2 decimal points
+      var roundedArea = Math.round(area * 100) / 100;
+      var $answer = $('#calculated-area');
+      $answer.html('<p><strong>' + roundedArea + '</strong></p><p>square meters</p>');
 
-      //Else, ask user to draw a feature
-      } else {
-        alert('Use the draw tools to draw a polygon!');
-      }
-    });
-
+    //Else, ask user to draw a feature
+    } else {
+      alert('Use the draw tools to draw a polygon!');
+    }
   });
 
   //Create an options object to pass to the .changeMode method as an argument
@@ -111,3 +99,29 @@
     }
     return options;
   }
+
+  //NOTE: right now this will only work once; have to create unique layer ids to calculate intersects multiple times
+  $('#intersect').on('click', function() {
+    //Calculate intersect
+    var intersect = turf.intersect(draw.getAll().features[0], draw.getAll().features[1]);
+    console.log('Calculated intersect');
+    console.log(intersect);
+    //Add returned polygon intersect to map as a draw feature
+    var intersectId = draw.add(intersect);
+
+    //Add returned polygon intersect to map as a layer
+    // map.addSource('intersect', {
+    //   'type': 'geojson',
+    //   'data': intersect
+    // });
+    // map.addLayer({
+    //   'id': 'intersect',
+    //   'type': 'fill',
+    //   'source': 'intersect',
+    //   'layout': {},
+    //   'paint': {
+    //     'fill-color': '#088',
+    //     'fill-opacity': 0.8
+    //   }
+    // });
+  });
