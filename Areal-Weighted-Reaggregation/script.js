@@ -98,3 +98,9 @@
     }
     return options;
   }
+
+  $('#intersect').on('click', function() {
+    var intersect = turf.intersect(draw.getAll().features[0], draw.getAll().features[1]);
+    console.log('Calculated intersect');
+    console.log(intersect);
+  });
