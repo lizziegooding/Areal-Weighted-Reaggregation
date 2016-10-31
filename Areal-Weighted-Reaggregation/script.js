@@ -60,10 +60,11 @@
     }
   });
 
+  //Calculate area of selected features
   var $calcButton = $('#calculate');
   $calcButton.on('click', function() {
     //Get all vertices from draw object TODO: check
-    var data = draw.getAll();
+    var data = draw.getSelected();
     //If user has drawn a feature...
     if (data.features.length > 0) {
       //Use Turf to calculate feature area
@@ -99,24 +100,28 @@
     return options;
   }
 
+  //NOTE: right now this will only work once; have to create unique layer ids to calculate intersects multiple times
   $('#intersect').on('click', function() {
     //Calculate intersect
     var intersect = turf.intersect(draw.getAll().features[0], draw.getAll().features[1]);
     console.log('Calculated intersect');
     console.log(intersect);
-    //Add returned intersected polygon to map
-    map.addSource('intersect', {
-      'type': 'geojson',
-      'data': intersect
-    });
-    map.addLayer({
-      'id': 'intersect',
-      'type': 'fill',
-      'source': 'intersect',
-      'layout': {},
-      'paint': {
-        'fill-color': '#088',
-        'fill-opacity': 0.8
-      }
-    });
+    //Add returned polygon intersect to map as a draw feature
+    var intersectId = draw.add(intersect);
+
+    //Add returned polygon intersect to map as a layer
+    // map.addSource('intersect', {
+    //   'type': 'geojson',
+    //   'data': intersect
+    // });
+    // map.addLayer({
+    //   'id': 'intersect',
+    //   'type': 'fill',
+    //   'source': 'intersect',
+    //   'layout': {},
+    //   'paint': {
+    //     'fill-color': '#088',
+    //     'fill-opacity': 0.8
+    //   }
+    // });
   });
