@@ -128,10 +128,8 @@
   });
 
   $('#intersectLayers').on('click', function() {
-    var intersectLayers = turf.intersect(
-      map.queryRenderedFeatures({layers: ['intersect']}),
-      map.queryRenderedFeatures({layers: ['counties']})
-    );
+    var intersectedCounties = turf.featureCollection(map.queryRenderedFeatures({layers: ['counties']}));
+    var intersectLayers = turf.intersect(intersect, intersectedCounties);
     console.log('Calculated layer intersect');
     var intersectLayersId = draw.add(intersectLayers);
   });
