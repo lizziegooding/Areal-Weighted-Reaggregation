@@ -105,23 +105,33 @@
     //Calculate intersect
     var intersect = turf.intersect(draw.getAll().features[0], draw.getAll().features[1]);
     console.log('Calculated intersect');
-    console.log(intersect);
+    // console.log(intersect);
+
     //Add returned polygon intersect to map as a draw feature
-    var intersectId = draw.add(intersect);
+    // var intersectId = draw.add(intersect);
 
     //Add returned polygon intersect to map as a layer
-    // map.addSource('intersect', {
-    //   'type': 'geojson',
-    //   'data': intersect
-    // });
-    // map.addLayer({
-    //   'id': 'intersect',
-    //   'type': 'fill',
-    //   'source': 'intersect',
-    //   'layout': {},
-    //   'paint': {
-    //     'fill-color': '#088',
-    //     'fill-opacity': 0.8
-    //   }
-    // });
+    map.addSource('intersect', {
+      'type': 'geojson',
+      'data': intersect
+    });
+    map.addLayer({
+      'id': 'intersect',
+      'type': 'fill',
+      'source': 'intersect',
+      'layout': {},
+      'paint': {
+        'fill-color': '#088',
+        'fill-opacity': 0.8
+      }
+    });
+  });
+
+  $('#intersectLayers').on('click', function() {
+    var intersectLayers = turf.intersect(
+      map.queryRenderedFeatures({layers: ['intersect']}),
+      map.queryRenderedFeatures({layers: ['counties']})
+    );
+    console.log('Calculated layer intersect');
+    var intersectLayersId = draw.add(intersectLayers);
   });
