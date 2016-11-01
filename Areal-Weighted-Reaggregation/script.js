@@ -127,9 +127,15 @@
     });
   });
 
+  //NOTE: Turf.intersect only works with two polygon features, not a feauture collection unlike ArcGIS or QGIS
   $('#intersectLayers').on('click', function() {
-    var intersectedCounties = turf.featureCollection(map.queryRenderedFeatures({layers: ['counties']}));
-    var intersectLayers = turf.intersect(intersect, intersectedCounties);
+    //Query counties layer for all features within viewport; returns an array of those features
+    //TODO: filter to only features which overlap draw geometry
+    var intersectedCounties = map.queryRenderedFeatures({layers: ['counties']});
+    //Loop through array of queried features and perform an intersect on each
+    for (var ii = 0; ii < intersectedCounties.length; ii++){
+      var intersectLayer = turf.intersect(intersect, intersectedCounties[ii]);
+      draw.add(intersectLayer);
+    }
     console.log('Calculated layer intersect');
-    var intersectLayersId = draw.add(intersectLayers);
   });
