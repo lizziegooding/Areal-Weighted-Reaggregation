@@ -66,7 +66,7 @@
     //Get all vertices from draw object TODO: check
     var data = draw.getSelected();
     //If user has drawn a feature...
-    if (data.features.length > 0) {
+    if (data.features.length > 0 && draw.getMode() != 'static') {
       //Use Turf to calculate feature area
       var area = turf.area(data);
       // restrict to area to 2 decimal points
@@ -76,7 +76,7 @@
 
     //Else, ask user to draw a feature
     } else {
-      alert('Use the draw tools to draw a polygon!');
+      alert('Use the draw tools to draw a polygon or toggle editing mode to select a feature.');
     }
   });
 
@@ -105,23 +105,40 @@
     //Calculate intersect
     var intersect = turf.intersect(draw.getAll().features[0], draw.getAll().features[1]);
     console.log('Calculated intersect');
-    console.log(intersect);
+    // console.log(intersect);
+
     //Add returned polygon intersect to map as a draw feature
-    var intersectId = draw.add(intersect);
+    // var intersectId = draw.add(intersect);
 
     //Add returned polygon intersect to map as a layer
-    // map.addSource('intersect', {
-    //   'type': 'geojson',
-    //   'data': intersect
-    // });
-    // map.addLayer({
-    //   'id': 'intersect',
-    //   'type': 'fill',
-    //   'source': 'intersect',
-    //   'layout': {},
-    //   'paint': {
-    //     'fill-color': '#088',
-    //     'fill-opacity': 0.8
-    //   }
-    // });
+    map.addSource('intersect', {
+      'type': 'geojson',
+      'data': intersect
+    });
+    map.addLayer({
+      'id': 'intersect',
+      'type': 'fill',
+      'source': 'intersect',
+      'layout': {},
+      'paint': {
+        'fill-color': '#088',
+        'fill-opacity': 0.8
+      }
+    });
+  });
+
+  //NOTE: Turf.intersect only works with two polygon features, not a feauture collection unlike ArcGIS or QGIS
+  $('#intersectLayers').on('click', function() {
+    //Query counties layer for all features within viewport; returns an array of those features
+    //TODO: filter to only features which overlap draw geometry
+    var intersectedCounties = map.queryRenderedFeatures({layers: ['counties']});
+    var intersect = map.queryRenderedFeatures({layers: ['intersect']})[0];
+    //Loop through array of queried features and perform an intersect on each
+    for (var ii = 0; ii < intersectedCounties.length; ii++){
+      var intersectLayer = turf.intersect(intersect, intersectedCounties[ii]);
+      if (intersectLayer) {
+        draw.add(intersectLayer);
+      }
+    }
+    console.log('Calculated layer intersect');
   });
