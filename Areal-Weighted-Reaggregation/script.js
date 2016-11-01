@@ -132,10 +132,13 @@
     //Query counties layer for all features within viewport; returns an array of those features
     //TODO: filter to only features which overlap draw geometry
     var intersectedCounties = map.queryRenderedFeatures({layers: ['counties']});
+    var intersect = map.queryRenderedFeatures({layers: ['intersect']})[0];
     //Loop through array of queried features and perform an intersect on each
     for (var ii = 0; ii < intersectedCounties.length; ii++){
       var intersectLayer = turf.intersect(intersect, intersectedCounties[ii]);
-      draw.add(intersectLayer);
+      if (intersectLayer) {
+        draw.add(intersectLayer);
+      }
     }
     console.log('Calculated layer intersect');
   });
