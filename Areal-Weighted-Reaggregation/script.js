@@ -66,7 +66,7 @@
     //Get all vertices from draw object TODO: check
     var data = draw.getSelected();
     //If user has drawn a feature...
-    if (data.features.length > 0) {
+    if (data.features.length > 0 && draw.getMode() != 'static') {
       //Use Turf to calculate feature area
       var area = turf.area(data);
       // restrict to area to 2 decimal points
@@ -76,7 +76,7 @@
 
     //Else, ask user to draw a feature
     } else {
-      alert('Use the draw tools to draw a polygon!');
+      alert('Use the draw tools to draw a polygon or toggle editing mode to select a feature.');
     }
   });
 
