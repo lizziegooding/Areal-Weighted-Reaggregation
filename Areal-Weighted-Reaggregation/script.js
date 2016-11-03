@@ -100,45 +100,77 @@
     return options;
   }
 
+//Calculate intersect of two draw polygons
   //NOTE: right now this will only work once; have to create unique layer ids to calculate intersects multiple times
-  $('#intersect').on('click', function() {
-    //Calculate intersect
-    var intersect = turf.intersect(draw.getAll().features[0], draw.getAll().features[1]);
-    console.log('Calculated intersect');
-    // console.log(intersect);
-
-    //Add returned polygon intersect to map as a draw feature
-    // var intersectId = draw.add(intersect);
-
-    //Add returned polygon intersect to map as a layer
-    map.addSource('intersect', {
-      'type': 'geojson',
-      'data': intersect
-    });
-    map.addLayer({
-      'id': 'intersect',
-      'type': 'fill',
-      'source': 'intersect',
-      'layout': {},
-      'paint': {
-        'fill-color': '#088',
-        'fill-opacity': 0.8
-      }
-    });
-  });
+  // $('#intersect').on('click', function() {
+  //   //Calculate intersect
+  //   var intersect = turf.intersect(draw.getAll().features[0], draw.getAll().features[1]);
+  //   console.log('Calculated intersect');
+  //   // console.log(intersect);
+  //
+  //   //Add returned polygon intersect to map as a draw feature
+  //   // var intersectId = draw.add(intersect);
+  //
+  //   //Add returned polygon intersect to map as a layer
+  //   map.addSource('intersect', {
+  //     'type': 'geojson',
+  //     'data': intersect
+  //   });
+  //   map.addLayer({
+  //     'id': 'intersect',
+  //     'type': 'fill',
+  //     'source': 'intersect',
+  //     'layout': {},
+  //     'paint': {
+  //       'fill-color': '#088',
+  //       'fill-opacity': 0.8
+  //     }
+  //   });
+  // });
 
   //NOTE: Turf.intersect only works with two polygon features, not a feauture collection unlike ArcGIS or QGIS
   $('#intersectLayers').on('click', function() {
     //Query counties layer for all features within viewport; returns an array of those features
     //TODO: filter to only features which overlap draw geometry
-    var intersectedCounties = map.queryRenderedFeatures({layers: ['counties']});
-    var intersect = map.queryRenderedFeatures({layers: ['intersect']})[0];
-    //Loop through array of queried features and perform an intersect on each
-    for (var ii = 0; ii < intersectedCounties.length; ii++){
-      var intersectLayer = turf.intersect(intersect, intersectedCounties[ii]);
-      if (intersectLayer) {
-        draw.add(intersectLayer);
+    var overlapCounties = map.queryRenderedFeatures({layers: ['counties']});
+    var drawnPoly = draw.getAll().features[0];
+    var countyArr = [];
+    var countyArrIntersect = [];
+
+    //Find unique counties
+    if (overlapCounties){
+      var uniqueCounties = getUniqueFeatures(overlapCounties, 'NAMELSAD10');
+    }
+    //Loop through array of queried features and perform an intersect on each-- equivalent to a pairwise intersect
+    // NOTE From Mapbox: Because features come from tiled vector data, feature geometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple times in query results.
+    for (var ii = 0; ii < uniqueCounties.length; ii++){
+      countyArr.push(uniqueCounties[ii].properties.NAMELSAD10);
+      var intersect = turf.intersect(drawnPoly, uniqueCounties[ii]);
+      if (intersect) {
+        draw.add(intersect);
+        countyArrIntersect.push(uniqueCounties[ii].properties.NAMELSAD10);
       }
     }
     console.log('Calculated layer intersect');
+    console.log('Counties in view: ', countyArr);
+    console.log('Intersected counties', countyArrIntersect);
+    console.log('Unique counties', uniqueCounties);
+
   });
+
+  function getUniqueFeatures(array, comparatorProperty) {
+    var existingFeatureKeys = {};
+    // Because features come from tiled vector data, feature geometries may be split
+    // or duplicated across tile boundaries and, as a result, features may appear
+    // multiple times in query results.
+    var uniqueFeatures = array.filter(function(el) {
+      if (existingFeatureKeys[el.properties[comparatorProperty]]) {
+        return false;
+      } else {
+        existingFeatureKeys[el.properties[comparatorProperty]] = true;
+        return true;
+      }
+    });
+
+    return uniqueFeatures;
+  }
