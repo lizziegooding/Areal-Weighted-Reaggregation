@@ -137,7 +137,8 @@
     draw.add(envelope);
     console.log(envelope);
     console.log([envelope.geometry.coordinates[0][0], envelope.geometry.coordinates[0][2]]);
-    var overlapCounties = map.queryRenderedFeatures([envelope.geometry.coordinates[0][0], envelope.geometry.coordinates[0][2]], {layers: ['counties']});
+    var overlapCounties = map.queryRenderedFeatures([envelope.geometry.coordinates[0][2], envelope.geometry.coordinates[0][0]], {layers: ['counties']});
+    console.log(overlapCounties);
     var countyArr = [];
     var countyArrIntersect = [];
 
