@@ -132,8 +132,12 @@
   $('#intersectLayers').on('click', function() {
     //Query counties layer for all features within viewport; returns an array of those features
     //TODO: filter to only features which overlap draw geometry
-    var overlapCounties = map.queryRenderedFeatures({layers: ['counties']});
     var drawnPoly = draw.getAll().features[0];
+    var envelope = turf.envelope(drawnPoly);
+    draw.add(envelope);
+    console.log(envelope);
+    console.log([envelope.geometry.coordinates[0][0], envelope.geometry.coordinates[0][2]]);
+    var overlapCounties = map.queryRenderedFeatures([envelope.geometry.coordinates[0][0], envelope.geometry.coordinates[0][2]], {layers: ['counties']});
     var countyArr = [];
     var countyArrIntersect = [];
 
