@@ -30,8 +30,19 @@
         'fill-opacity': 0.5
       }
     });
+
+    var canvas = map.getCanvasContainer();
   }); // End map.on(load)
 
+//Get coordinates of mouse pointer
+  map.on('mousemove', function (e) {
+    document.getElementById('info').innerHTML =
+      // e.point is the x, y coordinates of the mousemove event relative
+      // to the top-left corner of the map
+      JSON.stringify(e.point) + '<br/>' +
+      // e.lngLat is the longitude, latitude geographical position of the event
+      JSON.stringify(e.lngLat);
+  });
   // Create a new Mapbox GL draw object-- needs to be outside map.on(load) function to work
   var draw = mapboxgl.Draw({
     drawing: true,
@@ -138,11 +149,16 @@
     var envelope = turf.envelope(drawnPoly);
     //Add the envelope to the map as a drawn feature
     draw.add(envelope);
+    var sw = map.project(envelope.geometry.coordinates[0][0]);
+    var ne = map.project(envelope.geometry.coordinates[0][2]);
+    console.log('sw in pixels: ', sw);
+    console.log('ne in pixels: ', ne);
+
     var envelopeLatLong = [envelope.geometry.coordinates[0][0], envelope.geometry.coordinates[0][2]];
     console.log(envelope);
     console.log('Envelope coordinates: ', envelopeLatLong);
-    //Query rendered features by location in the counties layer which intersect the user-drawn polygon
-    var overlapCounties = map.queryRenderedFeatures(envelopeLatLong, {layers: ['counties']});
+    //Query rendered features by location in the counties layer which intersect the user-drawn polygon-- NOTE: need to use canvas x y rather than lat long coordinates
+    var overlapCounties = map.queryRenderedFeatures({layers: ['counties']});
 
     console.log('overlapCounties: ', overlapCounties);
     for (var jj = 0; jj < overlapCounties.length; jj++){
