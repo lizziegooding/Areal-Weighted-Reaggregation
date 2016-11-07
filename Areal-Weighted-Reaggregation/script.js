@@ -132,12 +132,18 @@
   $('#intersectLayers').on('click', function() {
     //Query counties layer for all features within viewport; returns an array of those features
     //TODO: filter to only features which overlap draw geometry
+    //Retrieve first polygon user draws
     var drawnPoly = draw.getAll().features[0];
+    //Draw a rectangle envelope around verticies of drawn polygon
     var envelope = turf.envelope(drawnPoly);
+    //Add the envelope to the map as a drawn feature
     draw.add(envelope);
+    var envelopeLatLong = [envelope.geometry.coordinates[0][0], envelope.geometry.coordinates[0][2]];
     console.log(envelope);
-    console.log([envelope.geometry.coordinates[0][0], envelope.geometry.coordinates[0][2]]);
-    var overlapCounties = map.queryRenderedFeatures([envelope.geometry.coordinates[0][0], envelope.geometry.coordinates[0][2]], {layers: ['counties']});
+    console.log('Envelope coordinates: ', envelopeLatLong);
+    //Query rendered features by location in the counties layer which intersect the user-drawn polygon
+    var overlapCounties = map.queryRenderedFeatures(envelopeLatLong, {layers: ['counties']});
+
     console.log('overlapCounties: ', overlapCounties);
     for (var jj = 0; jj < overlapCounties.length; jj++){
       overlapCounties[jj].type = 'Feature';
