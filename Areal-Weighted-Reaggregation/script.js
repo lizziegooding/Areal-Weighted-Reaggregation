@@ -25,13 +25,26 @@
       //Name of vector tiles uploaded to Mapbox Tileset
       'source-layer': 'County_2010Census_DP1-d3qmd4',
       'paint': {
-        'fill-color': '#ff69b4',
-        'fill-outline-color': 'white',
-        'fill-opacity': 0.5
+        'fill-outline-color': 'rgba(0,0,0,0.1)',
+        'fill-color': 'rgba(0,0,0,0.1)'
       }
     });
 
-    var canvas = map.getCanvasContainer();
+    map.addLayer({
+      'id': 'counties-highlighted',
+      'type': 'fill',
+      //Name of vector tiles from .addSource method above
+      'source': 'counties',
+      //Name of vector tiles uploaded to Mapbox Tileset
+      'source-layer': 'County_2010Census_DP1-d3qmd4',
+      'paint': {
+        'fill-outline-color': '#484896',
+        'fill-color': '#6e599f',
+        'fill-opacity': 0.75
+      }
+    });
+
+    // var canvas = map.getCanvasContainer();
   }); // End map.on(load)
 
 //Get coordinates of mouse pointer
@@ -173,14 +186,14 @@
 
     //Find unique counties
     if (overlapCounties){
-      var uniqueCounties = getUniqueFeatures(overlapCounties, 'FIPS');
+      var uniqueCounties = getUniqueFeatures(overlapCounties, 'NAMELSAD10');
     }
-    // var filter = uniqueCounties.reduce(function(memo, feature) {
-    //   memo.push(feature.properties.FIPS);
-    //   return memo;
-    // }, ['in', 'FIPS']);
-    //
-    // map.setFilter('counties-highlighted', filter);
+    var filter = uniqueCounties.reduce(function(memo, feature) {
+      memo.push(feature.properties.NAMELSAD10);
+      return memo;
+    }, ['in', 'NAMELSAD10']);
+
+    map.setFilter('counties-highlighted', filter);
 
     //Loop through array of queried features and perform an intersect on each-- equivalent to a pairwise intersect
     // NOTE From Mapbox: Because features come from tiled vector data, feature geometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple times in query results.
