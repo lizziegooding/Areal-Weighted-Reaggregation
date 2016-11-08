@@ -25,13 +25,27 @@
       //Name of vector tiles uploaded to Mapbox Tileset
       'source-layer': 'County_2010Census_DP1-d3qmd4',
       'paint': {
-        'fill-color': '#ff69b4',
         'fill-outline-color': 'white',
-        'fill-opacity': 0.5
+        'fill-color': 'rgba(0,0,0,0.1)'
       }
     });
 
-    var canvas = map.getCanvasContainer();
+    map.addLayer({
+      'id': 'counties-highlighted',
+      'type': 'fill',
+      //Name of vector tiles from .addSource method above
+      'source': 'counties',
+      //Name of vector tiles uploaded to Mapbox Tileset
+      'source-layer': 'County_2010Census_DP1-d3qmd4',
+      'paint': {
+        'fill-outline-color': 'white',
+        'fill-color': '#6e599f',
+        'fill-opacity': 0.75
+      },
+      //Use a filter to hide all features in this layer on load
+      'filter': ['in', 'COUNTY', '']
+    });
+
   }); // End map.on(load)
 
 //Get coordinates of mouse pointer
@@ -149,43 +163,67 @@
     var envelope = turf.envelope(drawnPoly);
     //Add the envelope to the map as a drawn feature
     draw.add(envelope);
+    //Convert envelope vertices to pixel space
     var sw = map.project(envelope.geometry.coordinates[0][0]);
     var ne = map.project(envelope.geometry.coordinates[0][2]);
     console.log('sw in pixels: ', sw);
     console.log('ne in pixels: ', ne);
 
-    var envelopeLatLong = [envelope.geometry.coordinates[0][0], envelope.geometry.coordinates[0][2]];
-    console.log(envelope);
-    console.log('Envelope coordinates: ', envelopeLatLong);
-    //Query rendered features by location in the counties layer which intersect the user-drawn polygon-- NOTE: need to use canvas x y rather than lat long coordinates
+    // var envelopeLatLong = [envelope.geometry.coordinates[0][0], envelope.geometry.coordinates[0][2]];
+    // console.log(envelope);
+    // console.log('Envelope coordinates: ', envelopeLatLong);
+
+    //Query rendered features by location in the counties la yer which intersect the user-drawn polygon-- NOTE: need to use canvas x y rather than lat long coordinates
     var overlapCounties = map.queryRenderedFeatures([sw, ne], {layers: ['counties']});
 
     console.log('overlapCounties: ', overlapCounties);
+
+    //Add the type property 'feature' to all queries counties
     for (var jj = 0; jj < overlapCounties.length; jj++){
       overlapCounties[jj].type = 'Feature';
-      draw.add(overlapCounties[jj]);
+      // draw.add(overlapCounties[jj]);
     }
-    var countyArr = [];
-    var countyArrIntersect = [];
 
-    //Find unique counties
+    // Find unique county GEOIDs which intersect drawn polygon envelope
     if (overlapCounties){
-      var uniqueCounties = getUniqueFeatures(overlapCounties, 'NAMELSAD10');
+      var uniqueCounties = getUniqueFeatures(overlapCounties, 'GEOID10');
     }
+
+    //Filter county highlighted layer to show counties which intersect envelope TODO: will need to change this to only counties which intersect drawn polygon
+    var cFilter = uniqueCounties.reduce(function(memo, feature) {
+      memo.push(feature.properties.GEOID10);
+      return memo;
+    }, ['in', 'GEOID10']);
+    console.log('filter: ', cFilter);
+
+    map.setFilter('counties-highlighted', cFilter);
+    //NOTE: like query rendered features, returns multiple geographies
+    var intersectedFeatures = map.querySourceFeatures('counties', {
+      sourceLayer: 'County_2010Census_DP1-d3qmd4',
+      filter: cFilter
+    });
+
+    console.log('intersectedFeatures: ', intersectedFeatures);
     //Loop through array of queried features and perform an intersect on each-- equivalent to a pairwise intersect
     // NOTE From Mapbox: Because features come from tiled vector data, feature geometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple times in query results.
-    for (var ii = 0; ii < uniqueCounties.length; ii++){
-      countyArr.push(uniqueCounties[ii].properties.NAMELSAD10);
-      var intersect = turf.intersect(drawnPoly, uniqueCounties[ii]);
+    var countyArr = [];
+    var countyArrIntersect = [];
+    //TODO: Loop through filtered counties rather than unique counties
+    var count = 0;
+    for (var ii = 0; ii < intersectedFeatures.length; ii++){
+      countyArr.push(intersectedFeatures[ii].properties.GEOID10);
+      var intersect = turf.intersect(drawnPoly, intersectedFeatures[ii]);
       if (intersect) {
         draw.add(intersect);
-        countyArrIntersect.push(uniqueCounties[ii].properties.NAMELSAD10);
+        countyArrIntersect.push(intersectedFeatures[ii].properties.GEOID10);
+        count++;
       }
     }
     console.log('Calculated layer intersect');
     console.log('Counties in view: ', countyArr);
     console.log('Intersected counties', countyArrIntersect);
     console.log('Unique counties', uniqueCounties);
+    console.log('Number intersect features', count);
 
   });
 
