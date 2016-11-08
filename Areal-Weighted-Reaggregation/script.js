@@ -158,7 +158,7 @@
     console.log(envelope);
     console.log('Envelope coordinates: ', envelopeLatLong);
     //Query rendered features by location in the counties layer which intersect the user-drawn polygon-- NOTE: need to use canvas x y rather than lat long coordinates
-    var overlapCounties = map.queryRenderedFeatures({layers: ['counties']});
+    var overlapCounties = map.queryRenderedFeatures([sw, ne], {layers: ['counties']});
 
     console.log('overlapCounties: ', overlapCounties);
     for (var jj = 0; jj < overlapCounties.length; jj++){
