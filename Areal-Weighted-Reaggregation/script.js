@@ -149,18 +149,21 @@
     var envelope = turf.envelope(drawnPoly);
     //Add the envelope to the map as a drawn feature
     draw.add(envelope);
+    //Convert envelope vertices to pixel space
     var sw = map.project(envelope.geometry.coordinates[0][0]);
     var ne = map.project(envelope.geometry.coordinates[0][2]);
     console.log('sw in pixels: ', sw);
     console.log('ne in pixels: ', ne);
 
-    var envelopeLatLong = [envelope.geometry.coordinates[0][0], envelope.geometry.coordinates[0][2]];
-    console.log(envelope);
-    console.log('Envelope coordinates: ', envelopeLatLong);
-    //Query rendered features by location in the counties layer which intersect the user-drawn polygon-- NOTE: need to use canvas x y rather than lat long coordinates
+    // var envelopeLatLong = [envelope.geometry.coordinates[0][0], envelope.geometry.coordinates[0][2]];
+    // console.log(envelope);
+    // console.log('Envelope coordinates: ', envelopeLatLong);
+
+    //Query rendered features by location in the counties la yer which intersect the user-drawn polygon-- NOTE: need to use canvas x y rather than lat long coordinates
     var overlapCounties = map.queryRenderedFeatures([sw, ne], {layers: ['counties']});
 
     console.log('overlapCounties: ', overlapCounties);
+
     for (var jj = 0; jj < overlapCounties.length; jj++){
       overlapCounties[jj].type = 'Feature';
       draw.add(overlapCounties[jj]);
@@ -170,8 +173,15 @@
 
     //Find unique counties
     if (overlapCounties){
-      var uniqueCounties = getUniqueFeatures(overlapCounties, 'NAMELSAD10');
+      var uniqueCounties = getUniqueFeatures(overlapCounties, 'FIPS');
     }
+    // var filter = uniqueCounties.reduce(function(memo, feature) {
+    //   memo.push(feature.properties.FIPS);
+    //   return memo;
+    // }, ['in', 'FIPS']);
+    //
+    // map.setFilter('counties-highlighted', filter);
+
     //Loop through array of queried features and perform an intersect on each-- equivalent to a pairwise intersect
     // NOTE From Mapbox: Because features come from tiled vector data, feature geometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple times in query results.
     for (var ii = 0; ii < uniqueCounties.length; ii++){
