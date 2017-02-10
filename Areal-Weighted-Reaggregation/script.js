@@ -57,6 +57,7 @@
       // e.lngLat is the longitude, latitude geographical position of the event
       JSON.stringify(e.lngLat);
   });
+
   // Create a new Mapbox GL draw object-- needs to be outside map.on(load) function to work
   var draw = mapboxgl.Draw({
     drawing: true,
@@ -79,11 +80,49 @@
     if ($editButtons.first().is(':visible')){
       console.log('Change mode, static');
       draw.changeMode('static', createOptions());
+
+      var polygon = draw.getAll().features[0]
+
+      map.addSource('polygon', {
+        'type': 'geojson',
+        'data': polygon
+      });
+      map.addLayer({
+        'id': 'polygon',
+        'type': 'fill',
+        'source': 'polygon',
+        'layout': {},
+        'paint': {
+          'fill-color': '#088',
+          'fill-opacity': 0.8
+        }
+      });
+      addPopup();
+
     } else {
       console.log('Change mode, simple select');
       draw.changeMode('simple_select', createOptions());
     }
   });
+
+  function addPopup(){
+      map.on('click', function (e) {
+          // var drawFeatures = draw.getSelected();
+          var features = map.queryRenderedFeatures(e.point, { layers: ['polygon'] });
+          console.log(features)
+          if (!features.length) {
+              return;
+          }
+
+          var feature = features[0];
+
+          var popup = new mapboxgl.Popup()
+              .setLngLat(map.unproject(e.point))
+              .setHTML('Hello!')
+              .addTo(map);
+      });
+  }
+
 
   //Calculate area of selected features
   var $calcButton = $('#calculate');
@@ -125,33 +164,35 @@
     return options;
   }
 
-//Calculate intersect of two draw polygons
-  //NOTE: right now this will only work once; have to create unique layer ids to calculate intersects multiple times
-  // $('#intersect').on('click', function() {
-  //   //Calculate intersect
-  //   var intersect = turf.intersect(draw.getAll().features[0], draw.getAll().features[1]);
-  //   console.log('Calculated intersect');
-  //   // console.log(intersect);
-  //
-  //   //Add returned polygon intersect to map as a draw feature
-  //   // var intersectId = draw.add(intersect);
-  //
-  //   //Add returned polygon intersect to map as a layer
-  //   map.addSource('intersect', {
-  //     'type': 'geojson',
-  //     'data': intersect
-  //   });
-  //   map.addLayer({
-  //     'id': 'intersect',
-  //     'type': 'fill',
-  //     'source': 'intersect',
-  //     'layout': {},
-  //     'paint': {
-  //       'fill-color': '#088',
-  //       'fill-opacity': 0.8
-  //     }
-  //   });
-  // });
+// // Calculate intersect of two draw polygons
+// //   NOTE: right now this will only work once; have to create unique layer ids to calculate intersects multiple times
+//   $('#intersect').on('click', function() {
+//     //Calculate intersect
+//     var intersect = turf.intersect(draw.getAll().features[0], draw.getAll().features[1]);
+//     console.log('Calculated intersect');
+//     // console.log(intersect);
+//
+//     //Add returned polygon intersect to map as a draw feature
+//     // var intersectId = draw.add(intersect);
+//
+//     //Add returned polygon intersect to map as a layer
+//     map.addSource('intersect', {
+//       'type': 'geojson',
+//       'data': intersect
+//     });
+//     map.addLayer({
+//       'id': 'intersect',
+//       'type': 'fill',
+//       'source': 'intersect',
+//       'layout': {},
+//       'paint': {
+//         'fill-color': '#088',
+//         'fill-opacity': 0.8
+//       }
+//     });
+//
+//     // When a click event occurs near a polygon, open a popup at the location of the feature, with description HTML from its properties.
+//   });
 
   //NOTE: Turf.intersect only works with two polygon features, not a feauture collection unlike ArcGIS or QGIS
   $('#intersectLayers').on('click', function() {
